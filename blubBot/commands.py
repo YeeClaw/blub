@@ -27,18 +27,18 @@ class PingCommands(commands.Cog):
         await message.edit(content=f"> Pong! 🏓\n> \n> `API Latency: {latency}ms`\n> `Bot Latency: {bot_latency}ms`")
 
     @commands.command()
-    async def mcftb(self, ctx):
+    async def mcftb(self, ctx, ip: str = Private.ip):
         """
         Gather information on a set minecraft server.
         """
         response = await ctx.send("> Gathering server information...")
 
         try:
-            server = JavaServer.lookup(Private.ip + ":25565", timeout=5)
+            server = JavaServer.lookup(ip, timeout=5)
             status = server.status()
 
             await response.edit(
-                f"\"{status.motd}\"\n> `Current players: {status.players.online}`\n> `Ping : {status.latency:.2f} ms`")
+                content=f"\"{status.motd.to_plain()}\"\n> `Current players: {status.players.online}`\n> `Ping : {status.latency:.2f} ms`")
         except TimeoutError:
             await response.edit(content="No server was found")
 
