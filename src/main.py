@@ -38,7 +38,7 @@ outbound_queue = asyncio.Queue()
 intents = discord.Intents.all()
 intents.members = True
 bot = Blub(command_prefix="!", intents=intents, inbound_queue=inbound_queue, outbound_queue=outbound_queue)
-sockey_client = SockeyClient(ip="127.0.0.1", port=8080, inbound_queue=inbound_queue, outbound_queue=outbound_queue)
+sockey_client = SockeyClient(os.getenv("SOCKEY_IP"), port=int(os.getenv("SOCKEY_PORT")), inbound_queue=inbound_queue, outbound_queue=outbound_queue)
 
 # Initialize and register the termination handler
 termination_handler = TerminationHandler()

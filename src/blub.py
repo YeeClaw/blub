@@ -11,7 +11,6 @@ class Blub(commands.Bot):
         super().__init__(**kwargs)
         self.inbound_queue = inbound_queue
         self.outbound_queue = outbound_queue
-        self.SOCKET_URI = "ws://127.0.0.1:8080"
 
     async def on_ready(self):
         logger.info(f'Logged in as {self.user.name}')
