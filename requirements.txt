@@ -1,0 +1,4 @@
+websockets~=13.0
+discord~=2.3.2
+python-dotenv~=1.0.1
+mcstatus~=11.1.1
