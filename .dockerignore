@@ -1,5 +1,6 @@
 # Files
 .env
+README.md
 *.pyc
 *.log
 

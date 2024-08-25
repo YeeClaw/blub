@@ -27,8 +27,12 @@ logger = logging.getLogger(__name__)
 # Load environment variables from .env file
 if load_dotenv():
     logger.info("Loaded environment variables from .env file!")
+elif load_dotenv() and os.getenv("BOT_TOKEN") == "[token]":
+    logger.error("Bot token needs to be set before the bot can be started!")
+    exit(1)
 else:
     logger.error("Failed to load environment variables from .env file!")
+    exit(1)
 
 # Establish the inbound and outbound queues
 inbound_queue = asyncio.Queue()
@@ -46,11 +50,12 @@ termination_handler.register_terminate_signal()
 
 
 async def main():
-    bot_task = asyncio.create_task(bot.start(os.getenv("BLUB_TOKEN")))
+    bot_task = asyncio.create_task(bot.start(os.getenv("BOT_TOKEN")))
     sockey_task = asyncio.create_task(sockey_client.handle_queues())
 
     try:
         await termination_handler.stop_event.wait()
+        logger.info("Termination signal received! Shutting down...")
     finally:
         bot_task.cancel()
         sockey_task.cancel()

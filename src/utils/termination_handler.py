@@ -16,8 +16,8 @@ class TerminationHandler:
 
     def _handle_stop_event(self, _sig, _frame):
         logger.info(f"Received signal {_sig} at frame {_frame}")
-        logger.info("Shutting down...")
         self.stop_event.set()
 
     def register_terminate_signal(self):
         signal.signal(signal.SIGINT, self._handle_stop_event)
+        signal.signal(signal.SIGTERM, self._handle_stop_event)
