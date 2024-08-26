@@ -10,6 +10,7 @@ from blub import Blub
 from src.utils.termination_handler import TerminationHandler
 
 # Initialize logging
+os.mkdir("logs") if not os.path.exists("logs") else None
 logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] [%(name)s/%(levelname)s]: %(message)s',
