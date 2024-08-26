@@ -1,5 +1,6 @@
 import logging
 from discord.ext import commands
+from mcstatus import JavaServer
 
 logger = logging.getLogger(__name__)
 
@@ -27,3 +28,19 @@ class Mcftb(commands.Cog):
             await response.edit(content=f"Message sent!")
         else:
             await response.edit(content=f"Message failed to send!")
+
+    @commands.command()
+    async def pingserver(self, ctx, ip: str = ""):
+        """
+        Gather information on a set minecraft server.
+        """
+        response = await ctx.send("> Gathering server information...")
+
+        try:
+            server = JavaServer.lookup(ip, timeout=5)
+            status = server.status()
+
+            await response.edit(
+                content=f"\"{status.motd.to_plain()}\"\n> `Current players: {status.players.online}`\n> `Ping : {status.latency:.2f} ms`")
+        except TimeoutError:
+            await response.edit(content="No server was found")

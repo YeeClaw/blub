@@ -1,8 +1,8 @@
 import time
 import math
 import logging
+import asyncio
 from discord.ext import commands
-from mcstatus import JavaServer
 
 logger = logging.getLogger(__name__)
 
@@ -34,17 +34,20 @@ class Utility(commands.Cog):
         await message.edit(content=f"> Pong! 🏓\n> \n> `API Latency: {latency}ms`\n> `Bot Latency: {bot_latency}ms`")
 
     @commands.command()
-    async def mcftb(self, ctx, ip: str = ""):
+    async def start_socket(self, ctx):
         """
-        Gather information on a set minecraft server.
+        Start the socket connection.
         """
-        response = await ctx.send("> Gathering server information...")
+        if self.bot.sockey_client.status == "Connected":
+            await ctx.send("Socket connection is already started!")
+        else:
+            socket_task = asyncio.create_task(self.bot.sockey_client.connect())
+            await ctx.send("Socket connection started!")
 
-        try:
-            server = JavaServer.lookup(ip, timeout=5)
-            status = server.status()
-
-            await response.edit(
-                content=f"\"{status.motd.to_plain()}\"\n> `Current players: {status.players.online}`\n> `Ping : {status.latency:.2f} ms`")
-        except TimeoutError:
-            await response.edit(content="No server was found")
+    @commands.command()
+    async def stop_socket(self, ctx):
+        """
+        Stop the socket connection.
+        """
+        await self.bot.sockey_client.disconnect()
+        await ctx.send("Socket connection stopped!")

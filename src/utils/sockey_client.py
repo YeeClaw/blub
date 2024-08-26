@@ -27,25 +27,34 @@ class SockeyClient:
     def status(self):
         return self._status
 
-    def __init__(self, ip: str, port: int, inbound_queue: asyncio.Queue, outbound_queue: asyncio.Queue):
+    def __init__(self, ip: str, port: int):
         self._ip = ip
         self._port = port
-        self.uri = f"ws://{self.ip}:{self.port}"
-        self._inbound_queue = inbound_queue
-        self._outbound_queue = outbound_queue
+        self._inbound_queue = asyncio.Queue()
+        self._outbound_queue = asyncio.Queue()
         self._status = "Disconnected"
+        self._exit_queues = asyncio.Event()
+
+    async def connect(self):
+        self._exit_queues.clear()
+        await self.handle_queues()
+
+    async def disconnect(self):
+        self._exit_queues.set()
 
     async def handle_queues(self):
         try:
-            async with websockets.connect(self.uri) as websocket:
+            async with websockets.connect(f"ws://{self.ip}:{self.port}") as websocket:
                 self._status = "Connected"
-                while True:
+                logger.info("Websocket connection established!")
+                while not self._exit_queues.is_set():
                     # Create tasks for receiving and sending messages
                     receive_task = asyncio.create_task(websocket.recv())
                     send_task = asyncio.create_task(self.outbound_queue.get())
+                    exit_task = asyncio.create_task(self._exit_queues.wait())
 
                     done, pending = await asyncio.wait(
-                        [receive_task, send_task],
+                        [receive_task, send_task, exit_task],
                         return_when=asyncio.FIRST_COMPLETED
                     )
 
@@ -56,6 +65,15 @@ class SockeyClient:
                     if send_task in done:
                         outbound = send_task.result()
                         await websocket.send(outbound)
+
+                    if exit_task in done:
+                        for task in pending:
+                            task.cancel()
+
+                        self._status = "Disconnected"
+                        logger.info("Websocket connection closed.")
+
+                        continue
 
                     # Cancel the pending task to avoid warnings
                     for task in pending:

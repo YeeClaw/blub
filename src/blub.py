@@ -1,16 +1,23 @@
-from discord.ext import commands
 import asyncio
+import os
 import logging
+
+from discord.ext import commands
+from src.utils.sockey_client import SockeyClient
 
 logger = logging.getLogger(__name__)
 
 
 class Blub(commands.Bot):
 
-    def __init__(self, inbound_queue: asyncio.Queue, outbound_queue: asyncio.Queue, **kwargs):
+    @property
+    def sockey_client(self):
+        return self._sockey_client
+
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.inbound_queue = inbound_queue
-        self.outbound_queue = outbound_queue
+        self._sockey_client = SockeyClient(os.getenv("SOCKEY_IP"), port=int(os.getenv("SOCKEY_PORT")))
+        self._connection_lock = asyncio.Lock()
 
     async def on_ready(self):
         logger.info(f'Logged in as {self.user.name}')
@@ -21,4 +28,7 @@ class Blub(commands.Bot):
 
     async def close(self):
         await super().close()
+        if self.sockey_client.status == "Connected":
+            await self.sockey_client.disconnect()
+            logger.info("Sockey closed!")
         logger.info("Blub closed!")

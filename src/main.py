@@ -7,7 +7,6 @@ import time
 from datetime import datetime
 from dotenv import load_dotenv
 from blub import Blub
-from src.utils.sockey_client import SockeyClient
 from src.utils.termination_handler import TerminationHandler
 
 # Initialize logging
@@ -34,15 +33,10 @@ else:
     logger.error("Failed to load environment variables from .env file!")
     exit(1)
 
-# Establish the inbound and outbound queues
-inbound_queue = asyncio.Queue()
-outbound_queue = asyncio.Queue()
-
 # Initialize the bot and the sockey client
-intents = discord.Intents.all()
+intents = discord.Intents.all()  # Fix this (make more precise)
 intents.members = True
-bot = Blub(command_prefix="!", intents=intents, inbound_queue=inbound_queue, outbound_queue=outbound_queue)
-sockey_client = SockeyClient(os.getenv("SOCKEY_IP"), port=int(os.getenv("SOCKEY_PORT")), inbound_queue=inbound_queue, outbound_queue=outbound_queue)
+bot = Blub(command_prefix="!", intents=intents)
 
 # Initialize and register the termination handler
 termination_handler = TerminationHandler()
@@ -51,15 +45,12 @@ termination_handler.register_terminate_signal()
 
 async def main():
     bot_task = asyncio.create_task(bot.start(os.getenv("BOT_TOKEN")))
-    sockey_task = asyncio.create_task(sockey_client.handle_queues())
 
-    try:
-        await termination_handler.stop_event.wait()
-        logger.info("Termination signal received! Shutting down...")
-    finally:
-        bot_task.cancel()
-        sockey_task.cancel()
-        await bot.close()
+    await termination_handler.stop_event.wait()
+    logger.info("Termination signal received! Shutting down...")
+    await bot.close()
+    await asyncio.sleep(0)  # Yield control to ensure handle_queues can process the event
+    bot_task.cancel()
 
 
 if __name__ == "__main__":
