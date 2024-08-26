@@ -30,17 +30,21 @@ class SockeyClient:
     def __init__(self, ip: str, port: int):
         self._ip = ip
         self._port = port
+        self._status = "Disconnected"
         self._inbound_queue = asyncio.Queue()
         self._outbound_queue = asyncio.Queue()
-        self._status = "Disconnected"
         self._exit_queues = asyncio.Event()
+        self._handle_queues_task = None
 
     async def connect(self):
         self._exit_queues.clear()
-        await self.handle_queues()
+        self._handle_queues_task = asyncio.create_task(self.handle_queues())
+        await self._handle_queues_task
 
     async def disconnect(self):
         self._exit_queues.set()
+        if self._handle_queues_task:  # Ensure that the queue is exited before returning
+            await self._handle_queues_task
 
     async def handle_queues(self):
         try:
@@ -80,6 +84,6 @@ class SockeyClient:
                         task.cancel()
 
         except asyncio.CancelledError:
-            logger.info("Websocket listener cancelled.")
+            logger.warning("Websocket listener cancelled! A proper shutdown was passed over!")
         except ConnectionRefusedError:
             logger.error("Connection refused. Is the server running?")

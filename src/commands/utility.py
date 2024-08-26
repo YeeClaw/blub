@@ -38,6 +38,10 @@ class Utility(commands.Cog):
         """
         Start the socket connection.
         """
+        if ctx.author.id != 190525744907157505:  # Yours truly
+            await ctx.send("suck toes")
+            return
+
         if self.bot.sockey_client.status == "Connected":
             await ctx.send("Socket connection is already started!")
         else:
@@ -49,5 +53,9 @@ class Utility(commands.Cog):
         """
         Stop the socket connection.
         """
+        if ctx.author.id != 190525744907157505:  # Yours truly
+            await ctx.send("suck toes")
+            return
+
         await self.bot.sockey_client.disconnect()
         await ctx.send("Socket connection stopped!")

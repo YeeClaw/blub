@@ -50,7 +50,6 @@ async def main():
     await termination_handler.stop_event.wait()
     logger.info("Termination signal received! Shutting down...")
     await bot.close()
-    await asyncio.sleep(0)  # Yield control to ensure handle_queues can process the event
     bot_task.cancel()
 
 

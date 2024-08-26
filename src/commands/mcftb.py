@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from discord.ext import commands
 from mcstatus import JavaServer
@@ -21,9 +22,9 @@ class Mcftb(commands.Cog):
         Send a message directly to the game server!
         """
         response = await ctx.send(f"Sending message...\n> {message}")
-        await self.bot.outbound_queue.put(f"say {message}")
+        await self.bot.sockey_client.outbound_queue.put(f"say {message}")
 
-        server_response = await self.bot.inbound_queue.get()
+        server_response = await self.bot.sockey_client.inbound_queue.get()
         if int(server_response) == 1:
             await response.edit(content=f"Message sent!")
         else:
@@ -44,3 +45,18 @@ class Mcftb(commands.Cog):
                 content=f"\"{status.motd.to_plain()}\"\n> `Current players: {status.players.online}`\n> `Ping : {status.latency:.2f} ms`")
         except TimeoutError:
             await response.edit(content="No server was found")
+
+    @commands.command()
+    async def pingsockey(self, ctx):
+        """
+        Ping the sockey server.
+        """
+        response = await ctx.send("> Pinging sockey server...")
+
+        await self.bot.sockey_client.outbound_queue.put("Ping!")
+        try:
+            server_response = await asyncio.wait_for(self.bot.sockey_client.inbound_queue.get(), timeout=5)
+            await response.edit(content=f"Sockey response: {server_response}")
+        except asyncio.TimeoutError:
+            await response.edit(content="Connection timed out! (is the server online?)")
+            return
