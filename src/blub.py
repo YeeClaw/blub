@@ -16,7 +16,7 @@ class Blub(commands.Bot):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._sockey_client = SockeyClient(os.getenv("SOCKEY_IP"), port=int(os.getenv("SOCKEY_PORT")))
+        self._sockey_client = SockeyClient(ip=os.getenv("SOCKEY_IP"), port=int(os.getenv("SOCKEY_PORT")), token="dummy")
         self._connection_lock = asyncio.Lock()
 
     async def on_ready(self):

@@ -2,6 +2,9 @@
 .env
 *.pyc
 *.log
+*.pem
+*.crt
+*.txt
 
 # Directories
 .idea/

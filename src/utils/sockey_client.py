@@ -1,6 +1,8 @@
 import websockets
 import asyncio
 import logging
+import ssl
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +29,10 @@ class SockeyClient:
     def status(self):
         return self._status
 
-    def __init__(self, ip: str, port: int):
+    def __init__(self, ip: str, port: int, token: str):
         self._ip = ip
         self._port = port
+        self._token = token
         self._status = "Disconnected"
         self._inbound_queue = asyncio.Queue()
         self._outbound_queue = asyncio.Queue()
@@ -47,8 +50,15 @@ class SockeyClient:
             await self._handle_queues_task
 
     async def handle_queues(self):
-        try:
-            async with websockets.connect(f"ws://{self.ip}:{self.port}") as websocket:
+        ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+        logger.info(os.getcwd())
+        ssl_context.load_verify_locations(cafile="resources/auth/server.crt")
+        try:  # Can this function be further abstracted?
+            async with websockets.connect(
+                    f"wss://{self.ip}:{self.port}",
+                    ssl=ssl_context,
+                    extra_headers={"Authorization": os.getenv("SOCKEY_TOKEN")}  # Catch bad token exceptions!!
+            ) as websocket:
                 self._status = "Connected"
                 logger.info("Websocket connection established!")
                 while not self._exit_queues.is_set():

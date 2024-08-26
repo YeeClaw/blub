@@ -22,3 +22,15 @@ nano .env
 ```
 And from there you should be good to go! You can either run `python src/main.py` from the docker shell or just restart 
 the docker container.
+
+### Connecting Securely to Spider Sockey
+
+When using this bot in tandem with a Spider Sockey websocket server, you will need to establish a secure connection via
+the `wss` protocol. If your Spider Sockey server is using self-signed certificates, you will need to add the certificate
+as a trusted certificate with blub. To do this, add the certificate to the `resources/auth/` directory while the container 
+is running. The certificate should be named `server.crt`. To do this while the container is running, run the following 
+command:
+```sh
+docker cp /path/to/server.crt <container_id_or_name>:/blub/resources/auth/server.crt
+```
+The reason this isn't copied over from the dockerfile is to avoid publishing the sensative certificate to the docker image.
