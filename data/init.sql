@@ -21,6 +21,9 @@ create table if not exists blub.activity
 );
 
 alter table blub.activity
+    add constraint unique_activity_name unique (activity_name);
+
+alter table blub.activity
     owner to postgres;
 
 create table if not exists blub.highscore
