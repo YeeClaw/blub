@@ -5,7 +5,6 @@ import os
 import time
 
 from datetime import datetime
-from dotenv import load_dotenv
 from blub import Blub
 from src.utils.termination_handler import TerminationHandler
 
@@ -23,16 +22,6 @@ logging.basicConfig(
 
 logging.Formatter.converter = time.gmtime
 logger = logging.getLogger(__name__)
-
-# Load environment variables from .env file
-if load_dotenv():
-    logger.info("Loaded environment variables from .env file!")
-elif load_dotenv() and os.getenv("BOT_TOKEN") == "[token]":
-    logger.error("Bot token needs to be set before the bot can be started!")
-    exit(1)
-else:
-    logger.error("Failed to load environment variables from .env file!")
-    exit(1)
 
 # Initialize the bot and the sockey client
 intents = discord.Intents.all()  # Fix this (make more precise)

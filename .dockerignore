@@ -5,7 +5,6 @@ README.md
 *.log
 *.pem
 *.crt
-*.txt
 
 # Directories
 .idea/
