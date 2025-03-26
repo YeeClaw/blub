@@ -34,7 +34,11 @@ termination_handler.register_terminate_signal()
 
 
 async def main():
-    bot_task = asyncio.create_task(bot.start(os.getenv("BOT_TOKEN")))
+    if not os.getenv("BOT_TOKEN"):
+        logger.error("Missing bot token in env!")
+        exit()
+
+    bot_task = asyncio.create_task(bot.start(os.getenv("BOT_TOKEN", "")))
 
     await termination_handler.stop_event.wait()
     logger.info("Termination signal received! Shutting down...")
