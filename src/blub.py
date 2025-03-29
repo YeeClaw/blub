@@ -18,7 +18,7 @@ class Blub(commands.Bot):
         super().__init__(**kwargs)
         self._sockey_client = SockeyClient(
             ip=os.getenv("SOCKEY_IP", ""),
-            port=int(os.getenv("SOCKEY_PORT", "")),
+            port=int(os.getenv("SOCKEY_PORT", 0)),
             token=os.getenv("SOCKEY_TOKEN", "")
         )
 
